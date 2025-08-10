@@ -1,0 +1,32 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: payment-processor
+            expected-sender: ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V
+            cost: 25370
+            path: contracts/payment-processor.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury-manager
+            expected-sender: ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V
+            cost: 48560
+            path: contracts/treasury-manager.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: yield-strategy
+            expected-sender: ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V
+            cost: 49870
+            path: contracts/yield-strategy.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.1"
