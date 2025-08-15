@@ -34,9 +34,9 @@ import {
   Clock,
   Target
 } from 'lucide-react';
-import { blockchainService } from '@/lib/blockchain';
+// import { blockchainService } from '@/lib/blockchain'; // Unused
 import { stacksAPI } from '@/lib/stacks-api';
-import { api } from '@/lib/api';
+// import { api } from '@/lib/api'; // Unused
 import { isUserSignedIn } from '@/lib/stacks';
 import { DEPLOYED_CONTRACTS } from '@/lib/contracts';
 
@@ -72,6 +72,7 @@ export function YieldStrategyManager({
   const [isClient, setIsClient] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   // New strategy form state
   const [newStrategy, setNewStrategy] = useState({
@@ -80,6 +81,53 @@ export function YieldStrategyManager({
     description: '',
     allocation: 0
   });
+
+  // Simple wallet test function
+  const testWalletConnection = async () => {
+    try {
+      setTesting(true);
+      setError(null);
+      
+      console.log('Testing wallet connection...');
+      
+      if (!businessAddress || !isUserSignedIn()) {
+        setError('❌ Wallet not connected. Please connect your wallet first.');
+        setTesting(false);
+        return;
+      }
+      
+      // Test a simple contract call
+      const { openContractCall } = await import('@stacks/connect');
+      const { STACKS_TESTNET } = await import('@stacks/network');
+      
+      openContractCall({
+        contractAddress: 'SP000000000000000000002Q6VF78',
+        contractName: 'pox',
+        functionName: 'get-pox-info',
+        functionArgs: [],
+        network: STACKS_TESTNET,
+        appDetails: {
+          name: 'sBTC Treasury Manager',
+          icon: window.location.origin + '/favicon.ico',
+        },
+        onFinish: (data: any) => {
+          console.log('✅ Wallet test successful:', data.txId);
+          setError(`✅ Wallet test successful! TX: ${data.txId}`);
+          setTesting(false);
+        },
+        onCancel: () => {
+          console.log('❌ Test cancelled by user');
+          setError('❌ Test cancelled by user (but popup worked!)');
+          setTesting(false);
+        }
+      });
+      
+    } catch (error) {
+      console.error('Wallet test failed:', error);
+      setError(error instanceof Error ? error.message : 'Wallet test failed');
+      setTesting(false);
+    }
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -129,11 +177,11 @@ export function YieldStrategyManager({
             };
           });
 
+          const hasRealActivity = userYieldTxs.length > 0;
           setStrategies(enhancedStrategies);
           
           if (hasRealActivity) {
             console.log('Real yield strategies loaded:', enhancedStrategies);
-            setStrategies(enhancedStrategies);
           } else {
             console.log('No yield strategies found - user has not created any yet');
             setStrategies([]);
@@ -220,6 +268,15 @@ export function YieldStrategyManager({
       }
 
       console.log('Creating strategy on blockchain...', newStrategy);
+      console.log('Business address:', businessAddress);
+      console.log('User signed in:', isUserSignedIn());
+
+      // Simple wallet check
+      if (!businessAddress || !isUserSignedIn()) {
+        throw new Error('Wallet not connected. Please connect your wallet first.');
+      }
+      
+      console.log('✅ Wallet is connected, proceeding with strategy creation...');
 
       // Import Stacks Connect dynamically
       const { openContractCall } = await import('@stacks/connect');
@@ -229,23 +286,38 @@ export function YieldStrategyManager({
 
       const { contractAddress, contractName } = parseContractId(DEPLOYED_CONTRACTS.YIELD_STRATEGY);
       
-      // Convert allocation to micro-units (multiply by 1,000,000)
-      const allocationMicro = Math.floor(newStrategy.allocation * 1000000);
+      console.log('Contract details:', { contractAddress, contractName });
+      console.log('Full contract ID:', DEPLOYED_CONTRACTS.YIELD_STRATEGY);
+      console.log('Network:', network);
+      
+      // Ensure we're using testnet since contracts were deployed there
+      const { STACKS_TESTNET } = await import('@stacks/network');
+      const contractNetwork = STACKS_TESTNET;
+      console.log('Using network for contract call:', contractNetwork);
 
-      // Create blockchain transaction
-      await new Promise((resolve, reject) => {
+      const functionArgs = [
+        stringAsciiCV(newStrategy.protocol),
+        uintCV(Math.floor(newStrategy.allocation * 100)),
+        uintCV(Math.floor(getProtocolAPY(newStrategy.protocol) * 100))
+      ];
+      
+      console.log('Function args:', functionArgs);
+      console.log('About to call openContractCall...');
+      
+      // Create blockchain transaction with simplified approach
+      return new Promise((resolve, reject) => {
         openContractCall({
           contractAddress,
           contractName,
           functionName: 'create-strategy',
-          functionArgs: [
-            stringAsciiCV(newStrategy.protocol),
-            uintCV(Math.floor(newStrategy.allocation * 100)), // Allocation as percentage (e.g., 50 for 50%)
-            uintCV(Math.floor(getProtocolAPY(newStrategy.protocol) * 100)) // APY as basis points (e.g., 850 for 8.5%)
-          ],
-          network,
-          onFinish: (data) => {
-            console.log('Strategy creation transaction submitted:', data.txId);
+          functionArgs,
+          network: contractNetwork,
+          appDetails: {
+            name: 'sBTC Treasury Manager',
+            icon: window.location.origin + '/favicon.ico',
+          },
+          onFinish: (data: any) => {
+            console.log('✅ Strategy creation transaction submitted:', data.txId);
             
             // Add the strategy to local state (it will be confirmed on blockchain later)
             const strategy: YieldStrategy = {
@@ -271,18 +343,33 @@ export function YieldStrategyManager({
             });
             
             setShowCreateDialog(false);
+            setCreating(false);
             resolve(data);
           },
           onCancel: () => {
+            console.log('❌ Transaction cancelled by user');
+            setCreating(false);
+            setError('Transaction cancelled by user');
             reject(new Error('Transaction cancelled by user'));
           }
         });
+        
+        console.log('openContractCall executed - waiting for wallet response...');
+        
+        // Add timeout handling
+        setTimeout(() => {
+          if (creating) {
+            console.log('⏰ Wallet popup timeout - no response after 30 seconds');
+            setCreating(false);
+            setError('Wallet popup timed out. Check if popup was blocked or wallet is locked.');
+            reject(new Error('Wallet popup timeout'));
+          }
+        }, 30000);
       });
 
     } catch (error) {
       console.error('Failed to create strategy:', error);
       setError(error instanceof Error ? error.message : 'Failed to create strategy');
-    } finally {
       setCreating(false);
     }
   };
@@ -314,7 +401,7 @@ export function YieldStrategyManager({
         )
       );
 
-      // Call harvest function on smart contract
+      // Import network for contract call\n      const { STACKS_TESTNET } = await import('@stacks/network');\n\n      // Call harvest function on smart contract
       await new Promise((resolve, reject) => {
         openContractCall({
           contractAddress,
@@ -494,14 +581,23 @@ export function YieldStrategyManager({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Active Strategies
-            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Strategy
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
+            <div className="flex space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={testWalletConnection}
+                disabled={testing}
+              >
+                {testing ? 'Testing...' : 'Test Wallet'}
+              </Button>
+              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Strategy
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create Yield Strategy</DialogTitle>
                   <DialogDescription>
@@ -573,9 +669,15 @@ export function YieldStrategyManager({
                   >
                     {creating ? 'Creating...' : 'Create Strategy'}
                   </Button>
+                  {creating && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Waiting for wallet approval...
+                    </p>
+                  )}
                 </DialogFooter>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </CardTitle>
           <CardDescription>
             Manage your yield-generating strategies

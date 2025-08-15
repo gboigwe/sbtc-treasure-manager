@@ -10,6 +10,7 @@ import { blockchainService } from '@/lib/blockchain';
 import { stacksAPI } from '@/lib/stacks-api';
 import { isUserSignedIn } from '@/lib/stacks';
 import { DEPLOYED_CONTRACTS } from '@/lib/contracts';
+import { getSBTCProtocol, SBTCProtocolService } from '@/lib/sbtc-protocol';
 
 interface TreasuryData {
   liquidBalance: number;
@@ -45,9 +46,12 @@ export function TreasuryOverview({ businessId, businessAddress }: TreasuryOvervi
 
       if (businessAddress) {
         try {
-          console.log('Fetching real treasury data from Stacks API...');
+          console.log('Fetching real sBTC treasury data from protocol...');
           
-          // Get real wallet balance
+          // Get real sBTC balance using official sBTC token contract
+          const sbtcBalance = await getSBTCProtocol().getSBTCBalance(businessAddress);
+          
+          // Get STX balance for comparison
           const stxBalance = await stacksAPI.getStxBalance(businessAddress);
           const transactionVolume = await stacksAPI.getTransactionVolume(businessAddress);
           
@@ -57,13 +61,8 @@ export function TreasuryOverview({ businessId, businessAddress }: TreasuryOvervi
             DEPLOYED_CONTRACTS.PAYMENT_PROCESSOR
           );
           
-          // Calculate treasury metrics from real data
-          const totalReceived = transactionVolume.received;
-          const totalSent = transactionVolume.sent;
-          const netBalance = totalReceived - totalSent;
-          
-          // Use actual STX balance as base, with realistic allocation
-          const totalBalance = Math.max(stxBalance, 0.001); // Minimum for demo
+          // Use actual sBTC balance as primary treasury asset
+          const totalBalance = Math.max(sbtcBalance, 0.001); // Use real sBTC balance
           const liquidBalance = totalBalance * 0.3; // 30% liquid
           const yieldBalance = totalBalance * 0.7; // 70% in yield
           
@@ -84,7 +83,8 @@ export function TreasuryOverview({ businessId, businessAddress }: TreasuryOvervi
           };
           
           setTreasuryData(treasuryData);
-          console.log('Real treasury data loaded:', {
+          console.log('Real sBTC treasury data loaded:', {
+            sbtcBalance,
             stxBalance,
             transactionVolume,
             paymentTxs: paymentTxs.length,
