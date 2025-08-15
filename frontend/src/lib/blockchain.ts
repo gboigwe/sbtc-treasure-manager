@@ -6,7 +6,8 @@ import {
   noneCV,
   someCV,
   AnchorMode,
-  PostConditionMode 
+  PostConditionMode,
+  ClarityType
 } from '@stacks/transactions';
 import { userSession, network } from './stacks';
 import { DEPLOYED_CONTRACTS, parseContractId, STACKS_API_URL, CONTRACT_FUNCTIONS } from './contracts';
@@ -78,7 +79,7 @@ export class BlockchainService {
     };
 
     const transaction = await makeContractCall(txOptions);
-    const broadcastResponse = await broadcastTransaction(transaction, network);
+    const broadcastResponse = await broadcastTransaction({ transaction, network });
     
     return {
       txId: broadcastResponse.txid || broadcastResponse,
@@ -106,7 +107,7 @@ export class BlockchainService {
     };
 
     const transaction = await makeContractCall(txOptions);
-    const broadcastResponse = await broadcastTransaction(transaction, network);
+    const broadcastResponse = await broadcastTransaction({ transaction, network });
     
     return {
       txId: broadcastResponse.txid || broadcastResponse,
@@ -133,7 +134,7 @@ export class BlockchainService {
     };
 
     const transaction = await makeContractCall(txOptions);
-    const broadcastResponse = await broadcastTransaction(transaction, network);
+    const broadcastResponse = await broadcastTransaction({ transaction, network });
     
     return {
       txId: broadcastResponse.txid || broadcastResponse,
@@ -157,7 +158,7 @@ export class BlockchainService {
         },
         body: JSON.stringify({
           sender: businessAddress,
-          arguments: functionArgs.map(arg => arg.serialize().toString('hex'))
+          arguments: functionArgs
         })
       });
 
@@ -204,7 +205,7 @@ export class BlockchainService {
         },
         body: JSON.stringify({
           sender: contractAddress,
-          arguments: functionArgs.map(arg => arg.serialize().toString('hex'))
+          arguments: functionArgs
         })
       });
 

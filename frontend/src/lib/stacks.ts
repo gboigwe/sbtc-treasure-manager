@@ -12,7 +12,7 @@ export const connectWallet = () => {
   showConnect({
     appDetails: {
       name: 'sBTC Treasury Manager',
-      icon: window.location.origin + '/logo.svg',
+      icon: window.location.origin + '/favicon.ico',
     },
     redirectTo: '/',
     onFinish: () => {

@@ -65,15 +65,30 @@ export interface AddressBalance {
 
 export class StacksAPIService {
   private baseUrl: string;
+  private apiKey?: string;
 
   constructor() {
     this.baseUrl = STACKS_API_URL;
+    this.apiKey = process.env.NEXT_PUBLIC_HIRO_API_KEY;
+  }
+
+  private getHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
+    
+    return headers;
   }
 
   async getAddressTransactions(address: string, limit: number = 50, offset: number = 0): Promise<StacksTransaction[]> {
     try {
       const response = await fetch(
-        `${this.baseUrl}/extended/v1/address/${address}/transactions?limit=${limit}&offset=${offset}`
+        `${this.baseUrl}/extended/v1/address/${address}/transactions?limit=${limit}&offset=${offset}`,
+        { headers: this.getHeaders() }
       );
       
       if (!response.ok) {
@@ -90,7 +105,10 @@ export class StacksAPIService {
 
   async getAddressBalance(address: string): Promise<AddressBalance | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/extended/v1/address/${address}/balances`);
+      const response = await fetch(
+        `${this.baseUrl}/extended/v1/address/${address}/balances`,
+        { headers: this.getHeaders() }
+      );
       
       if (!response.ok) {
         throw new Error(`Failed to fetch balance: ${response.status}`);
@@ -107,7 +125,8 @@ export class StacksAPIService {
     try {
       const [contractAddress, contractName] = contractId.split('.');
       const response = await fetch(
-        `${this.baseUrl}/extended/v1/contract/${contractAddress}.${contractName}/transactions?limit=${limit}`
+        `${this.baseUrl}/extended/v1/contract/${contractAddress}.${contractName}/transactions?limit=${limit}`,
+        { headers: this.getHeaders() }
       );
       
       if (!response.ok) {
