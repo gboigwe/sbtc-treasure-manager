@@ -1,122 +1,649 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Web3 Color Palette - Bitcoin & Stacks */
+  --bitcoin-neon: #ff9500;
+  --bitcoin-glow: rgba(255, 149, 0, 0.8);
+  --bitcoin-primary: #f97316;
+  --bitcoin-dark: #e65100;
+  
+  --stacks-neon: #8a2be2;
+  --stacks-glow: rgba(138, 43, 226, 0.8);
+  --stacks-primary: #9d65ff;
+  --stacks-dark: #7b2cbf;
+  
+  --cyber-blue: #00d9ff;
+  --cyber-green: #00ff88;
+  --cyber-purple: #b800ff;
+  --cyber-pink: #ff00aa;
+  
+  /* Dark Theme Base */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #14141f;
+  --bg-tertiary: #1e1e2e;
+  --bg-card: rgba(20, 20, 31, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.02);
+  
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b2;
+  --text-tertiary: #6b6b7d;
+  
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-glow: rgba(255, 149, 0, 0.3);
+  --border-stacks: rgba(157, 101, 255, 0.3);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--bitcoin-primary) 0%, var(--stacks-primary) 100%);
+  --gradient-neon: linear-gradient(135deg, var(--bitcoin-neon) 0%, var(--stacks-neon) 50%, var(--cyber-blue) 100%);
+  --gradient-dark: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+  --gradient-card: linear-gradient(145deg, rgba(20, 20, 31, 0.9) 0%, rgba(30, 30, 46, 0.6) 100%);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Base Styles */
+* {
+  box-sizing: border-box;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Web3 Background Effects */
+.web3-bg {
+  background: radial-gradient(ellipse at top, rgba(255, 149, 0, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom right, rgba(157, 101, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom left, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+              var(--bg-primary);
+  position: relative;
+  min-height: 100vh;
+}
+
+.web3-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 149, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(157, 101, 255, 0.03) 0%, transparent 50%);
+  animation: breathe 8s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* Particle Effect Background */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--bitcoin-neon);
+  border-radius: 50%;
+  animation: float-particle 20s linear infinite;
+  box-shadow: 0 0 6px var(--bitcoin-glow);
+}
+
+.particle:nth-child(2n) {
+  background: var(--stacks-neon);
+  box-shadow: 0 0 6px var(--stacks-glow);
+  animation-duration: 15s;
+}
+
+.particle:nth-child(3n) {
+  background: var(--cyber-blue);
+  box-shadow: 0 0 6px rgba(0, 217, 255, 0.8);
+  animation-duration: 25s;
+}
+
+/* Premium Glass Morphism */
+.web3-glass {
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.web3-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%);
+  transition: left 0.6s ease;
+}
+
+.web3-glass:hover::before {
+  left: 100%;
+}
+
+/* Neon Cards */
+.neon-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.neon-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-neon);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.neon-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-glow);
+  box-shadow: 
+    0 8px 40px rgba(255, 149, 0, 0.2),
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.neon-card:hover::before {
+  opacity: 1;
+}
+
+/* Bitcoin Themed Card */
+.neon-card-bitcoin {
+  background: linear-gradient(145deg, 
+    rgba(249, 115, 22, 0.1) 0%, 
+    rgba(20, 20, 31, 0.9) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.neon-card-bitcoin:hover {
+  border-color: var(--bitcoin-neon);
+  box-shadow: 
+    0 8px 40px rgba(249, 115, 22, 0.3),
+    0 0 20px rgba(255, 149, 0, 0.4),
+    inset 0 1px 0 rgba(255, 149, 0, 0.2);
+}
+
+/* Stacks Themed Card */
+.neon-card-stacks {
+  background: linear-gradient(145deg, 
+    rgba(157, 101, 255, 0.1) 0%, 
+    rgba(20, 20, 31, 0.9) 100%);
+  border: 1px solid rgba(157, 101, 255, 0.3);
+}
+
+.neon-card-stacks:hover {
+  border-color: var(--stacks-neon);
+  box-shadow: 
+    0 8px 40px rgba(157, 101, 255, 0.3),
+    0 0 20px rgba(138, 43, 226, 0.4),
+    inset 0 1px 0 rgba(138, 43, 226, 0.2);
+}
+
+/* Premium Buttons */
+.btn-web3 {
+  background: var(--gradient-primary);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 14px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 14px;
+}
+
+.btn-web3::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+  transition: left 0.5s ease;
+}
+
+.btn-web3:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 30px rgba(255, 149, 0, 0.4),
+    0 0 20px rgba(157, 101, 255, 0.3);
+  border-color: var(--bitcoin-neon);
+}
+
+.btn-web3:hover::before {
+  left: 100%;
+}
+
+.btn-web3:active {
+  transform: translateY(-1px);
+}
+
+/* Bitcoin Button */
+.btn-bitcoin {
+  background: linear-gradient(135deg, var(--bitcoin-primary) 0%, var(--bitcoin-dark) 100%);
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+}
+
+.btn-bitcoin:hover {
+  box-shadow: 
+    0 8px 25px rgba(249, 115, 22, 0.5),
+    0 0 20px rgba(255, 149, 0, 0.6);
+}
+
+/* Stacks Button */
+.btn-stacks {
+  background: linear-gradient(135deg, var(--stacks-primary) 0%, var(--stacks-dark) 100%);
+  box-shadow: 0 4px 15px rgba(157, 101, 255, 0.3);
+}
+
+.btn-stacks:hover {
+  box-shadow: 
+    0 8px 25px rgba(157, 101, 255, 0.5),
+    0 0 20px rgba(138, 43, 226, 0.6);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--bitcoin-neon);
+  color: var(--bitcoin-neon);
+  box-shadow: 
+    0 0 20px rgba(255, 149, 0, 0.3),
+    inset 0 0 20px rgba(255, 149, 0, 0.1);
+}
+
+/* Neon Text Effects */
+.text-neon-bitcoin {
+  color: var(--bitcoin-neon);
+  text-shadow: 
+    0 0 10px var(--bitcoin-glow),
+    0 0 20px var(--bitcoin-glow),
+    0 0 40px var(--bitcoin-glow);
+}
+
+.text-neon-stacks {
+  color: var(--stacks-neon);
+  text-shadow: 
+    0 0 10px var(--stacks-glow),
+    0 0 20px var(--stacks-glow),
+    0 0 40px var(--stacks-glow);
+}
+
+.text-gradient {
+  background: var(--gradient-neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: bold;
+}
+
+.text-hologram {
+  background: linear-gradient(45deg, 
+    var(--cyber-blue) 0%, 
+    var(--cyber-green) 25%, 
+    var(--cyber-pink) 50%, 
+    var(--bitcoin-neon) 75%, 
+    var(--stacks-neon) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-size: 400% 400%;
+  animation: hologram 3s ease infinite;
+}
+
+/* Navigation */
+.nav-web3 {
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+/* Ensure proper stacking for Tailwind v4 */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+/* Tab Navigation Improvements */
+.tab-navigation {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-neon);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link:hover::before,
+.nav-link.active::before {
+  width: 80%;
+}
+
+/* Input Fields */
+.input-web3 {
+  background: rgba(20, 20, 31, 0.8);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  color: var(--text-primary);
+  padding: 14px 16px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.input-web3:focus {
+  outline: none;
+  border-color: var(--bitcoin-neon);
+  box-shadow: 
+    0 0 0 3px rgba(255, 149, 0, 0.1),
+    0 0 20px rgba(255, 149, 0, 0.2);
+  background: rgba(20, 20, 31, 0.95);
+}
+
+.input-web3::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Metrics Cards */
+.metric-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 4px;
+  background: var(--gradient-neon);
+  border-radius: 16px 16px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.metric-card:hover::before {
+  opacity: 1;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--bitcoin-neon);
+  text-shadow: 0 0 10px var(--bitcoin-glow);
+}
+
+.metric-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 25%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Status Indicators */
+.status-online {
+  color: var(--cyber-green);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+}
+
+.status-pending {
+  color: var(--bitcoin-neon);
+  text-shadow: 0 0 10px var(--bitcoin-glow);
+  animation: pulse-glow 2s infinite;
+}
+
+.status-error {
+  color: var(--cyber-pink);
+  text-shadow: 0 0 10px rgba(255, 0, 170, 0.8);
+}
+
+/* Animations */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
   }
-  body {
-    @apply bg-background text-foreground;
+  10% {
+    opacity: 1;
   }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes hologram {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px var(--bitcoin-glow),
+      0 0 10px var(--bitcoin-glow),
+      0 0 20px var(--bitcoin-glow);
+  }
+  50% {
+    text-shadow: 
+      0 0 10px var(--bitcoin-glow),
+      0 0 20px var(--bitcoin-glow),
+      0 0 40px var(--bitcoin-glow);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(255, 149, 0, 0.3),
+      inset 0 0 20px rgba(255, 149, 0, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(255, 149, 0, 0.5),
+      inset 0 0 30px rgba(255, 149, 0, 0.2);
+  }
+}
+
+/* Tab Scrolling */
+.tab-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .neon-card {
+    padding: 16px;
+    margin: 8px 0;
+  }
+  
+  .btn-web3 {
+    padding: 12px 20px;
+    font-size: 12px;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+  }
+  
+  /* Mobile Tab Styling */
+  .nav-link {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+  
+  /* Ensure tabs are visible on mobile */
+  .tab-container {
+    padding-bottom: 4px;
+  }
+  
+  /* Mobile header adjustments */
+  .text-hologram {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .neon-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .nav-link {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+  
+  .text-hologram {
+    font-size: 1.25rem;
+  }
+}
+
+/* Selection and Focus States */
+::selection {
+  background: rgba(255, 149, 0, 0.3);
+  text-shadow: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bitcoin-neon);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-neon);
 }
