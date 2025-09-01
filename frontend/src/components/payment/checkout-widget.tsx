@@ -31,7 +31,7 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
   const [loadingBalance, setLoadingBalance] = useState(false);
 
   const sbtcProtocol = getSBTCProtocol();
-  const user = getUserData();
+  const user = isUserSignedIn() ? getUserData() : null;
   const userAddress = user?.profile?.stxAddress?.testnet || user?.profile?.stxAddress?.mainnet;
 
   // Check wallet connection and load balance
