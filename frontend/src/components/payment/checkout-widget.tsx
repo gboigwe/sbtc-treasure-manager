@@ -13,14 +13,20 @@ import { isUserSignedIn, connectWallet, getUserData } from '@/lib/stacks';
 import { getSBTCProtocol } from '@/lib/sbtc-protocol';
 
 interface CheckoutWidgetProps {
-  businessAddress: string;
-  businessId: string;
-  onSuccess?: (txId: string) => void;
+  onSuccess?: (txId: string, amount: number, recipient: string) => void;
   onError?: (error: string) => void;
+  defaultRecipient?: string;
+  allowCustomRecipient?: boolean;
 }
 
-export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError }: CheckoutWidgetProps) {
+export function CheckoutWidget({ 
+  onSuccess,
+  onError,
+  defaultRecipient = '',
+  allowCustomRecipient = true
+}: CheckoutWidgetProps) {
   const [amount, setAmount] = useState('');
+  const [recipient, setRecipient] = useState(defaultRecipient);
   const [email, setEmail] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,6 +35,7 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
   const [isClient, setIsClient] = useState(false);
   const [sbtcBalance, setSbtcBalance] = useState<number>(0);
   const [loadingBalance, setLoadingBalance] = useState(false);
+  const [testMode, setTestMode] = useState(false);
 
   const sbtcProtocol = getSBTCProtocol();
   const user = isUserSignedIn() ? getUserData() : null;
@@ -62,55 +69,91 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
     }
   };
 
-  // Handle sBTC payment
-  const handlePayment = async () => {
-    console.log('🚀 Payment button clicked');
-    console.log('💰 Current state:', {
-      amount,
-      sbtcBalance,
-      walletConnected,
-      userAddress,
-      businessAddress
+  const isValidStacksAddress = (address: string): boolean => {
+    if (!address) return false;
+    // Testnet addresses can be 40 or 41 chars (ST + 38-39 chars), mainnet: S + 40 chars = 41 total
+    const trimmed = address.trim();
+    const isValid = /^ST[A-Z0-9]{38,39}$|^S[A-Z0-9]{40}$/.test(trimmed);
+    console.log('Address validation:', { 
+      original: address, 
+      trimmed, 
+      length: trimmed.length, 
+      isValid, 
+      isTestnet: trimmed.startsWith('ST'),
+      regexTestST: /^ST[A-Z0-9]{38,39}$/.test(trimmed),
+      regexTestS: /^S[A-Z0-9]{40}$/.test(trimmed)
     });
+    return isValid;
+  };
+
+  // Debug the button disable conditions
+  const getButtonDisableReason = () => {
+    if (loading) return 'Loading...';
+    if (!amount) return 'No amount entered';
+    if (parseFloat(amount) <= 0) return 'Amount must be > 0';
+    if (!testMode && parseFloat(amount) > sbtcBalance) return 'Insufficient sBTC balance';
+    if (!recipient) return 'No recipient address';
+    if (!isValidStacksAddress(recipient)) return 'Invalid Stacks address format';
+    if (!walletConnected || !userAddress) return 'Wallet not connected';
+    return null; // Button should be enabled
+  };
+
+  const handlePayment = async () => {
+    console.log('💰 Processing REAL payment...');
+    
+    // Check wallet availability first
+    const { checkWalletAvailability } = await import('@/lib/stacks');
+    if (!checkWalletAvailability()) {
+      onError?.('No Stacks wallet detected! Please install Leather, Xverse, or Hiro wallet.');
+      return;
+    }
     
     if (!amount || parseFloat(amount) <= 0) {
-      console.log('❌ Invalid amount:', amount);
       onError?.('Please enter a valid amount');
       return;
     }
 
+    if (!recipient || !isValidStacksAddress(recipient)) {
+      onError?.('Please enter a valid Stacks address (starts with S)');
+      return;
+    }
+
     if (!walletConnected || !userAddress) {
-      console.log('❌ Wallet not connected:', { walletConnected, userAddress });
-      onError?.('Please connect your wallet first - try refreshing the page');
+      onError?.('Please connect your wallet first');
       return;
     }
 
     const amountNum = parseFloat(amount);
-    if (amountNum > sbtcBalance) {
-      console.log('❌ Insufficient balance:', { amount: amountNum, balance: sbtcBalance });
-      onError?.(`Insufficient sBTC balance. You have ${sbtcBalance} sBTC but trying to send ${amountNum} sBTC`);
-      return;
+    
+    // Balance check depends on test mode
+    if (testMode) {
+      // For STX test mode, we'll skip balance check since we're just testing wallet popup
+      console.log('🧪 Test mode: skipping balance check');
+    } else {
+      if (amountNum > sbtcBalance) {
+        onError?.(`Insufficient sBTC balance. You have ${sbtcBalance.toFixed(8)} sBTC`);
+        return;
+      }
     }
 
-    console.log('✅ All checks passed - Starting payment process...');
-    console.log('📦 Payment details:', {
-      amount: amountNum,
-      from: userAddress,
-      to: businessAddress,
-      description: description || 'Coffee shop payment'
-    });
-    
     setLoading(true);
 
     try {
-      console.log('🔗 Calling transferSBTC...');
+      let transactionId: string;
       
-      // Transfer sBTC using the real protocol
-      const transactionId = await sbtcProtocol.transferSBTC(amountNum, businessAddress);
+      if (testMode) {
+        // Test with STX transfer first to verify wallet popup
+        console.log('🧪 Using STX test mode');
+        transactionId = await sbtcProtocol.testSTXTransfer(amountNum, recipient);
+      } else {
+        // REAL sBTC transfer using official contract
+        console.log('💰 Using real sBTC transfer');
+        transactionId = await sbtcProtocol.transferSBTC(amountNum, recipient);
+      }
       
-      console.log('🎉 sBTC payment successful:', transactionId);
+      console.log('✅ Payment successful:', transactionId);
       setTxId(transactionId);
-      onSuccess?.(transactionId);
+      onSuccess?.(transactionId, amountNum, recipient);
       
       // Refresh balance after payment
       setTimeout(loadSbtcBalance, 2000);
@@ -118,7 +161,6 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
     } catch (error) {
       console.error('💥 Payment failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Payment failed';
-      console.error('💥 Error details:', errorMessage);
       onError?.(errorMessage);
     } finally {
       setLoading(false);
@@ -130,6 +172,7 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
     setAmount('');
     setEmail('');
     setDescription('');
+    setRecipient(defaultRecipient);
     setTxId(null);
     loadSbtcBalance();
   };
@@ -149,10 +192,10 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <CreditCard className="h-5 w-5" />
-          <span>Pay with sBTC</span>
+          <span>Encheq Payment</span>
         </CardTitle>
         <CardDescription>
-          Secure Bitcoin payments via sBTC
+          Professional sBTC payments with real blockchain integration
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -205,15 +248,51 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  You don't have any sBTC. You need to deposit BTC first to get sBTC for payments.
+                  You need sBTC tokens to make payments.{' '}
+                  <button 
+                    onClick={() => sbtcProtocol.requestFromFaucet()}
+                    className="underline text-blue-600 hover:text-blue-800"
+                  >
+                    Get testnet sBTC from faucet
+                  </button>
                 </AlertDescription>
               </Alert>
             )}
 
             {/* Payment Form */}
             <div className="space-y-4">
+              {/* Recipient Address - DYNAMIC, NOT HARDCODED */}
               <div>
-                <Label htmlFor="amount">Amount (sBTC)</Label>
+                <Label htmlFor="recipient">Recipient Address</Label>
+                <Input
+                  id="recipient"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder=""
+                  disabled={loading}
+                  className="font-mono"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter the Stacks address to send to (testnet: starts with 'ST', mainnet: starts with 'S')
+                </p>
+              </div>
+
+              {/* Test Mode Toggle */}
+              <div className="flex items-center space-x-2 p-3 bg-transparent border border-blue-500/30 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="testMode"
+                  checked={testMode}
+                  onChange={(e) => setTestMode(e.target.checked)}
+                  className="cursor-pointer"
+                />
+                <Label htmlFor="testMode" className="cursor-pointer text-sm text-white">
+                  Test Mode (use STX instead of sBTC to verify wallet popup works)
+                </Label>
+              </div>
+
+              <div>
+                <Label htmlFor="amount">Amount ({testMode ? 'STX' : 'sBTC'})</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -254,20 +333,29 @@ export function CheckoutWidget({ businessAddress, businessId, onSuccess, onError
                 />
               </div>
 
+              {/* Debug Info */}
+              {getButtonDisableReason() && (
+                <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                  <strong>Button disabled:</strong> {getButtonDisableReason()}
+                </div>
+              )}
+
               <Button 
                 onClick={handlePayment} 
-                disabled={loading || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > sbtcBalance}
-                className="w-full"
+                disabled={!!getButtonDisableReason()}
+                className="w-full cursor-pointer bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500"
               >
-                {loading ? 'Processing Payment...' : `Pay ${amount || '0'} sBTC`}
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Processing Payment...
+                  </span>
+                ) : testMode ? (
+                  `🧪 Test Transfer ${amount || '0'} STX`
+                ) : (
+                  `💳 Pay ${amount || '0'} sBTC`
+                )}
               </Button>
-            </div>
-
-            {/* Business Info */}
-            <div className="text-xs text-muted-foreground space-y-1 pt-4 border-t">
-              <p><strong>Paying to:</strong></p>
-              <p className="font-mono break-all">{businessAddress}</p>
-              <p><strong>Business ID:</strong> {businessId}</p>
             </div>
           </div>
         )}
