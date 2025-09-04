@@ -34,11 +34,10 @@ import {
   Clock,
   Target
 } from 'lucide-react';
-// import { blockchainService } from '@/lib/blockchain'; // Unused
 import { stacksAPI } from '@/lib/stacks-api';
-// import { api } from '@/lib/api'; // Unused
 import { isUserSignedIn } from '@/lib/stacks';
 import { DEPLOYED_CONTRACTS } from '@/lib/contracts';
+import { getSBTCProtocol } from '@/lib/sbtc-protocol';
 
 interface YieldStrategy {
   id: string;
@@ -107,7 +106,7 @@ export function YieldStrategyManager({
         functionArgs: [],
         network: STACKS_TESTNET,
         appDetails: {
-          name: 'sBTC Treasury Manager',
+          name: 'Encheq Treasury',
           icon: window.location.origin + '/favicon.ico',
         },
         onFinish: (data: any) => {
@@ -139,12 +138,16 @@ export function YieldStrategyManager({
       setLoading(true);
       setError(null);
 
-      // Try to get real balance for realistic strategy allocation
+      // Try to get real sBTC balance for realistic strategy allocation
       let realBalance = availableBalance;
       if (businessAddress) {
         try {
-          console.log('Fetching real balance for yield strategies...');
-          const walletBalance = await stacksAPI.getStxBalance(businessAddress);
+          console.log('Fetching real sBTC balance for yield strategies...');
+          const sbtcProtocol = getSBTCProtocol();
+          const sbtcBalance = await sbtcProtocol.getSBTCBalance(businessAddress);
+          
+          console.log('📊 Real sBTC balance for strategies:', sbtcBalance);
+          realBalance = Math.max(sbtcBalance, 0.001); // Use real balance or minimum
           
           // Get contract transactions to see if user has interacted with yield contracts
           const yieldTransactions = await stacksAPI.getContractTransactions(DEPLOYED_CONTRACTS.YIELD_STRATEGY);

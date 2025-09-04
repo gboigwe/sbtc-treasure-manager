@@ -1,380 +1,195 @@
-// Real sBTC Protocol Integration
-// Based on official sBTC documentation and Emily API
-
-import { getEmilyClient, type DepositStatus, type WithdrawalStatus } from './emily-api';
-import { bitcoinAddressToTuple, generateDepositAddress, type DepositAddress } from './bitcoin-address';
-
-// Official sBTC Contract Addresses
-export const SBTC_CONTRACTS = {
-  // Real sBTC Protocol Contracts (Testnet)
-  SBTC_TOKEN: 'ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-token',
-  SBTC_DEPOSIT: 'ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-deposit', 
-  SBTC_WITHDRAWAL: 'ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-withdrawal',
-  SBTC_REGISTRY: 'ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-registry',
-  
-  // Custom Treasury Contracts (for yield management on top of sBTC)
-  TREASURY_MANAGER: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.treasury-manager',
-  YIELD_STRATEGY: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.yield-strategy'
-} as const;
-
-export const SBTC_FUNCTIONS = {
-  // SIP-010 sBTC Token Functions
-  TOKEN: {
-    TRANSFER: 'transfer',
-    GET_BALANCE: 'get-balance',
-    GET_BALANCE_AVAILABLE: 'get-balance-available',
-    GET_BALANCE_LOCKED: 'get-balance-locked',
-    GET_TOTAL_SUPPLY: 'get-total-supply'
-  },
-  
-  // sBTC Deposit Functions (BTC → sBTC)
-  DEPOSIT: {
-    COMPLETE_DEPOSIT: 'complete-deposit-wrapper',
-    COMPLETE_DEPOSITS: 'complete-deposits-wrapper'
-  },
-  
-  // sBTC Withdrawal Functions (sBTC → BTC)
-  WITHDRAWAL: {
-    INITIATE_WITHDRAWAL: 'initiate-withdrawal-request',
-    ACCEPT_WITHDRAWAL: 'accept-withdrawal-request',
-    REJECT_WITHDRAWAL: 'reject-withdrawal-request'
-  },
-  
-  // sBTC Registry Functions
-  REGISTRY: {
-    GET_WITHDRAWAL_REQUEST: 'get-withdrawal-request',
-    GET_CURRENT_SIGNER_DATA: 'get-current-signer-data',
-    GET_CURRENT_AGGREGATE_PUBKEY: 'get-current-aggregate-pubkey'
-  }
-} as const;
-
-// Emily API (Official sBTC Bridge API)
-export const EMILY_API_BASE = 'https://api.sbtc.tech'; // Official sBTC API
-
-export interface SBTCDepositRequest {
-  amount: number; // Amount in satoshis
-  recipient: string; // Stacks address
-  bitcoin_tx_id: string;
-  bitcoin_tx_output_index: number;
-}
-
-export interface SBTCWithdrawalRequest {
-  amount: number; // Amount in satoshis (1 sBTC = 100,000,000 sats)
-  recipient: {
-    version: string; // Bitcoin address version
-    hashbytes: string; // Bitcoin address hash
-  };
-  max_fee: number; // Maximum fee in satoshis
-}
-
-export interface SBTCOperation {
-  id: string;
-  type: 'deposit' | 'withdrawal';
-  status: 'pending' | 'accepted' | 'confirmed' | 'failed';
-  amount: number;
-  bitcoin_tx_id?: string;
-  stacks_tx_id?: string;
-  created_at: string;
-}
+// Real sBTC Protocol Integration - Encheq Treasury
+import { OFFICIAL_SBTC_CONTRACTS, SBTC_FUNCTIONS } from './contracts';
 
 export class SBTCProtocolService {
-  private emilyClient = getEmilyClient();
   private network: 'testnet' | 'mainnet';
 
   constructor(network: 'testnet' | 'mainnet' = 'testnet') {
     this.network = network;
-    this.emilyClient = getEmilyClient(network);
   }
   
-  // Get real sBTC balance for an address
+  // Get REAL sBTC balance for any address
   async getSBTCBalance(address: string): Promise<number> {
     try {
-      console.log('Fetching sBTC balance for:', address);
+      console.log('🔍 Fetching REAL sBTC balance for:', address);
       
-      // Use the same method as real-data-demo for consistency
+      const apiUrl = this.network === 'mainnet' 
+        ? 'https://api.hiro.so' 
+        : 'https://api.testnet.hiro.so';
+      
       const response = await fetch(
-        `https://api.testnet.hiro.so/extended/v1/address/${address}/balances`
+        `${apiUrl}/extended/v1/address/${address}/balances`
       );
 
       if (!response.ok) {
-        console.warn('sBTC balance fetch failed:', response.status);
+        console.warn('Balance fetch failed:', response.status);
         return 0;
       }
 
       const balanceData = await response.json();
-      console.log('Balance data:', balanceData);
+      console.log('📊 Raw balance data:', balanceData);
       
-      // Check for sBTC tokens using the correct contract identifier
-      const sbtcTokenKey = `${SBTC_CONTRACTS.SBTC_TOKEN}::sbtc-token`;
+      // Check for sBTC tokens using multiple possible contract formats
+      const possibleKeys = [
+        `${OFFICIAL_SBTC_CONTRACTS.SBTC_TOKEN}::sbtc-token`,
+        `${OFFICIAL_SBTC_CONTRACTS.SBTC_TOKEN}::sbtc`,
+        `${OFFICIAL_SBTC_CONTRACTS.SBTC_TOKEN}::token`,
+        OFFICIAL_SBTC_CONTRACTS.SBTC_TOKEN
+      ];
       
-      if (balanceData.fungible_tokens && balanceData.fungible_tokens[sbtcTokenKey]) {
-        const balanceStr = balanceData.fungible_tokens[sbtcTokenKey].balance;
-        const balanceSats = parseInt(balanceStr || '0');
-        const sbtcBalance = balanceSats / 100000000; // Convert to sBTC
-        console.log('Found sBTC balance:', sbtcBalance);
-        return sbtcBalance;
+      console.log('🔍 Checking for sBTC with keys:', possibleKeys);
+      
+      if (balanceData.fungible_tokens) {
+        console.log('📝 Available fungible tokens:', Object.keys(balanceData.fungible_tokens));
+        
+        for (const key of possibleKeys) {
+          if (balanceData.fungible_tokens[key]) {
+            const balanceStr = balanceData.fungible_tokens[key].balance;
+            const balanceSats = parseInt(balanceStr || '0');
+            const sbtcBalance = balanceSats / 100000000; // Convert to sBTC
+            console.log(`✅ Found sBTC balance with key ${key}:`, sbtcBalance);
+            return sbtcBalance;
+          }
+        }
+        
+        // Check for any token that might be sBTC
+        for (const [tokenKey, tokenData] of Object.entries(balanceData.fungible_tokens)) {
+          if (tokenKey.toLowerCase().includes('sbtc') || tokenKey.toLowerCase().includes('bitcoin')) {
+            console.log(`🔍 Found potential sBTC token: ${tokenKey}`, tokenData);
+            const balanceStr = (tokenData as any).balance;
+            const balanceSats = parseInt(balanceStr || '0');
+            const sbtcBalance = balanceSats / 100000000;
+            console.log(`✅ Using balance from ${tokenKey}:`, sbtcBalance);
+            return sbtcBalance;
+          }
+        }
       }
       
-      console.log('No sBTC balance found for token:', sbtcTokenKey);
+      console.log('ℹ️  No sBTC balance found');
       return 0;
     } catch (error) {
-      console.error('Error fetching sBTC balance:', error);
+      console.error('❌ Error fetching sBTC balance:', error);
       return 0;
     }
   }
 
-  // Transfer sBTC using the official sBTC token contract
-  async transferSBTC(amount: number, recipient: string): Promise<string> {
+  // Test STX transfer first (for debugging wallet popup)
+  async testSTXTransfer(amount: number, recipient: string): Promise<string> {
     try {
-      console.log('Starting sBTC transfer:', { amount, recipient });
+      console.log('🧪 Testing STX transfer to verify wallet popup:', { amount, recipient });
       
-      const { openContractCall } = await import('@stacks/connect');
-      const { uintCV, standardPrincipalCV, noneCV } = await import('@stacks/transactions');
-      const { STACKS_TESTNET } = await import('@stacks/network');
+      const { openSTXTransfer } = await import('@stacks/connect');
+      const { network } = await import('@/lib/stacks');
 
-      const [contractAddress, contractName] = SBTC_CONTRACTS.SBTC_TOKEN.split('.');
-      const amountSats = Math.floor(amount * 100000000); // Convert sBTC to satoshis
-
-      console.log('Contract call parameters:', {
-        contractAddress,
-        contractName,
-        functionName: SBTC_FUNCTIONS.TOKEN.TRANSFER,
-        amountSats,
-        recipient,
-        network: 'testnet'
-      });
+      const amountMicroSTX = Math.floor(amount * 1000000); // Convert STX to microSTX
 
       return new Promise((resolve, reject) => {
-        try {
-          console.log('🔥 About to call openContractCall...');
-          
-          openContractCall({
-            contractAddress,
-            contractName,
-            functionName: SBTC_FUNCTIONS.TOKEN.TRANSFER,
-            functionArgs: [
-              uintCV(amountSats),
-              standardPrincipalCV(recipient),
-              noneCV() // memo
-            ],
-            network: STACKS_TESTNET,
-            appDetails: {
-              name: 'sBTC Treasury Manager',
-              icon: window.location.origin + '/favicon.ico',
-            },
-            onFinish: (data) => {
-              console.log('✅ Transaction finished:', data);
-              resolve(data.txId);
-            },
-            onCancel: () => {
-              console.log('❌ Transaction cancelled by user');
-              reject(new Error('Transaction cancelled by user'));
-            }
-          });
-          
-          console.log('🚀 openContractCall executed - wallet should pop up now!');
-        } catch (error) {
-          console.error('💥 Error in openContractCall:', error);
-          reject(error);
-        }
+        openSTXTransfer({
+          recipient,
+          amount: amountMicroSTX.toString(),
+          memo: 'Encheq test transfer',
+          network,
+          appDetails: {
+            name: 'Encheq Treasury',
+            icon: window.location.origin + '/encheq-logo.png',
+          },
+          onFinish: (data) => {
+            console.log('✅ STX transfer test successful:', data);
+            resolve(data.txId);
+          },
+          onCancel: () => {
+            console.log('❌ STX transfer cancelled by user');
+            reject(new Error('Transaction cancelled by user'));
+          }
+        });
       });
     } catch (error) {
-      console.error('💥 Error in transferSBTC:', error);
+      console.error('💥 STX transfer test failed:', error);
       throw error;
     }
   }
 
-  // Initiate sBTC withdrawal (sBTC → BTC)
-  async initiateWithdrawal(amount: number, bitcoinAddress: string, maxFee: number = 10000): Promise<string> {
+  // Transfer REAL sBTC using SIP-010 standard
+  async transferSBTC(amount: number, recipient: string): Promise<string> {
+    console.log('🚀 Starting REAL sBTC transfer:', { amount, recipient });
+    
+    const { isUserSignedIn, getUserData, network } = await import('@/lib/stacks');
     const { openContractCall } = await import('@stacks/connect');
-    const { uintCV, tupleCV, bufferCV } = await import('@stacks/transactions');
-    const { network } = await import('@/lib/stacks');
+    const { uintCV, standardPrincipalCV, noneCV, PostConditionMode } = await import('@stacks/transactions');
+    
+    if (!isUserSignedIn()) {
+      throw new Error('Please connect your wallet first');
+    }
 
-    const [contractAddress, contractName] = SBTC_CONTRACTS.SBTC_WITHDRAWAL.split('.');
-    const amountSats = Math.floor(amount * 100000000);
+    const userData = getUserData();
+    const senderAddress = userData?.profile?.stxAddress?.testnet || userData?.profile?.stxAddress?.mainnet;
 
-    // Parse Bitcoin address to get version and hashbytes
-    // This is a simplified version - real implementation would need proper Bitcoin address parsing
-    const recipient = tupleCV({
-      version: bufferCV(Buffer.from([0x00])), // P2PKH version
-      hashbytes: bufferCV(Buffer.from(bitcoinAddress.slice(0, 32), 'hex')) // Simplified
+    if (!senderAddress) {
+      throw new Error('No sender address found');
+    }
+
+    const [contractAddress, contractName] = OFFICIAL_SBTC_CONTRACTS.SBTC_TOKEN.split('.');
+    const amountSats = Math.floor(amount * 100000000); // Convert sBTC to satoshis
+
+    console.log('📋 sBTC Contract call details:', {
+      contractAddress,
+      contractName,
+      functionName: 'transfer',
+      amountSats,
+      recipient,
+      sender: senderAddress
     });
 
     return new Promise((resolve, reject) => {
       openContractCall({
+        network,
         contractAddress,
         contractName,
-        functionName: SBTC_FUNCTIONS.WITHDRAWAL.INITIATE_WITHDRAWAL,
+        functionName: 'transfer',
         functionArgs: [
           uintCV(amountSats),
-          recipient,
-          uintCV(maxFee)
+          standardPrincipalCV(senderAddress), // sender
+          standardPrincipalCV(recipient), // recipient  
+          noneCV() // memo (optional)
         ],
-        network,
-        onFinish: (data) => resolve(data.txId),
-        onCancel: () => reject(new Error('Transaction cancelled'))
+        postConditions: [],
+        postConditionMode: PostConditionMode.Allow,
+        appDetails: {
+          name: 'Encheq Treasury',
+          icon: window.location.origin + '/favicon.ico',
+        },
+        onFinish: (data) => {
+          console.log('✅ REAL sBTC transfer successful:', data);
+          resolve(data.txId);
+        },
+        onCancel: () => {
+          console.log('❌ Transaction cancelled by user');
+          reject(new Error('Transaction cancelled by user'));
+        }
       });
     });
   }
 
-  // Get withdrawal request status
-  async getWithdrawalRequest(requestId: number) {
-    try {
-      const [contractAddress, contractName] = SBTC_CONTRACTS.SBTC_REGISTRY.split('.');
-      
-      const response = await fetch(
-        `https://api.testnet.hiro.so/v2/contracts/call-read/${contractAddress}/${contractName}/${SBTC_FUNCTIONS.REGISTRY.GET_WITHDRAWAL_REQUEST}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sender: contractAddress,
-            arguments: [`u${requestId}`]
-          })
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        return result.result;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error fetching withdrawal request:', error);
-      return null;
-    }
+  // Get sBTC from testnet faucet
+  async requestFromFaucet(): Promise<void> {
+    console.log('🚰 Opening sBTC faucet...');
+    window.open('https://platform.hiro.so/faucet', '_blank');
   }
 
-  // Get current sBTC signer data
-  async getCurrentSignerData() {
-    try {
-      const [contractAddress, contractName] = SBTC_CONTRACTS.SBTC_REGISTRY.split('.');
-      
-      const response = await fetch(
-        `https://api.testnet.hiro.so/v2/contracts/call-read/${contractAddress}/${contractName}/${SBTC_FUNCTIONS.REGISTRY.GET_CURRENT_SIGNER_DATA}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sender: contractAddress,
-            arguments: []
-          })
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        return result.result;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error fetching signer data:', error);
-      return null;
-    }
-  }
-
-  // Emily API Integration - Track deposit/withdrawal operations
-  async trackOperation(operationId: string): Promise<SBTCOperation | null> {
-    try {
-      const response = await fetch(`${EMILY_API_BASE}/deposits/${operationId}`);
-      
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error tracking operation:', error);
-      return null;
-    }
-  }
-
-  // Convert satoshis to sBTC
-  static satsToSBTC(sats: number): number {
-    return sats / 100000000;
-  }
-
-  // Convert sBTC to satoshis  
-  static sbtcToSats(sbtc: number): number {
-    return Math.floor(sbtc * 100000000);
-  }
-
-  // Get sBTC bridge URL for deposits
-  static getBridgeURL(): string {
-    return 'https://app.stacks.co';
-  }
-
-  // Get sBTC rewards program URL
-  static getRewardsURL(): string {
-    return 'https://bitcoinismore.org';
-  }
-
-  // Generate a deposit address for BTC → sBTC conversion
-  async generateDepositAddress(stacksAddress: string, reclaimPublicKey: string): Promise<DepositAddress> {
-    try {
-      const signersPublicKey = await this.emilyClient.getSignersPublicKey();
-      return generateDepositAddress(stacksAddress, signersPublicKey, reclaimPublicKey, this.network);
-    } catch (error) {
-      console.error('Failed to generate deposit address:', error);
-      throw new Error('Failed to generate deposit address');
-    }
-  }
-
-  // Notify Emily about a new deposit
-  async notifyDeposit(stacksAddress: string, bitcoinTxid: string, bitcoinTxOutputIndex: number, depositAddress: DepositAddress): Promise<void> {
-    try {
-      await this.emilyClient.notifyDeposit({
-        stacksAddress,
-        bitcoinTxid,
-        bitcoinTxOutputIndex,
-        reclaimScript: depositAddress.reclaimScript,
-        depositScript: depositAddress.redeemScript,
-      });
-    } catch (error) {
-      console.error('Failed to notify Emily about deposit:', error);
-      throw error;
-    }
-  }
-
-  // Get deposit status from Emily
-  async getDepositStatus(txid: string, vout: number = 0): Promise<DepositStatus> {
-    return await this.emilyClient.getDepositStatus(txid, vout);
-  }
-
-  // Get withdrawal status from Emily
-  async getWithdrawalStatus(requestId: string): Promise<WithdrawalStatus> {
-    return await this.emilyClient.getWithdrawalStatus(requestId);
-  }
-
-  // Get all deposits for an address
-  async getAddressDeposits(stacksAddress: string): Promise<DepositStatus[]> {
-    return await this.emilyClient.getAddressDeposits(stacksAddress);
-  }
-
-  // Get all withdrawals for an address
-  async getAddressWithdrawals(stacksAddress: string): Promise<WithdrawalStatus[]> {
-    return await this.emilyClient.getAddressWithdrawals(stacksAddress);
-  }
-
-  // Encode Bitcoin address for withdrawal contract
-  encodeBitcoinAddress(address: string) {
-    return bitcoinAddressToTuple(address, this.network);
-  }
-
-  // Check if Emily API is available
-  async checkEmilyHealth(): Promise<boolean> {
-    return await this.emilyClient.checkHealth();
+  // Check if address has any sBTC for UI feedback
+  async hasSBTC(address: string): Promise<boolean> {
+    const balance = await this.getSBTCBalance(address);
+    return balance > 0;
   }
 }
 
-// Export service instances
-export const sbtcProtocolTestnet = new SBTCProtocolService('testnet');
-export const sbtcProtocolMainnet = new SBTCProtocolService('mainnet');
+// Export singleton for the appropriate network
+export const sbtcProtocol = new SBTCProtocolService(
+  process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? 'mainnet' : 'testnet'
+);
 
-// Helper to get the right service based on environment
+// Helper function to get the protocol instance
 export function getSBTCProtocol(network?: 'testnet' | 'mainnet'): SBTCProtocolService {
   const targetNetwork = network || (process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? 'mainnet' : 'testnet');
-  return targetNetwork === 'mainnet' ? sbtcProtocolMainnet : sbtcProtocolTestnet;
+  return new SBTCProtocolService(targetNetwork);
 }

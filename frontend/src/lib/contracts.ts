@@ -1,4 +1,13 @@
-// Contract utilities for sBTC Treasury Manager
+// Contract utilities for Encheq Treasury
+
+// Real sBTC Contract addresses for working MVP
+export const OFFICIAL_SBTC_CONTRACTS = {
+  // Your deployed sBTC token contract on testnet
+  SBTC_TOKEN: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.sbtc-token',
+  SBTC_DEPOSIT: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.sbtc-deposit', 
+  SBTC_WITHDRAWAL: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.sbtc-withdrawal',
+  SBTC_REGISTRY: 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.sbtc-registry',
+} as const;
 
 export const DEPLOYED_CONTRACTS = {
   PAYMENT_PROCESSOR: process.env.NEXT_PUBLIC_PAYMENT_PROCESSOR_CONTRACT || 'ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V.payment-processor',
@@ -9,6 +18,17 @@ export const DEPLOYED_CONTRACTS = {
 export const STACKS_API_URL = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' 
   ? 'https://api.hiro.so' 
   : 'https://api.testnet.hiro.so';
+
+export const SBTC_FUNCTIONS = {
+  TOKEN: {
+    TRANSFER: 'transfer',
+    GET_BALANCE: 'get-balance',
+    GET_TOTAL_SUPPLY: 'get-total-supply',
+    GET_NAME: 'get-name',
+    GET_SYMBOL: 'get-symbol',
+    GET_DECIMALS: 'get-decimals'
+  }
+} as const;
 
 export function parseContractId(contractId: string) {
   const [contractAddress, contractName] = contractId.split('.');

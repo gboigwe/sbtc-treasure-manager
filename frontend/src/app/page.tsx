@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { isUserSignedIn, connectWallet } from '@/lib/stacks';
 import Link from 'next/link';
 import { 
@@ -56,7 +57,7 @@ const ParticleBackground = () => {
   return <div className="particles"></div>;
 };
 
-export default function LandingPage() {
+export default function EncheqLandingPage() {
   const [isClient, setIsClient] = useState(false);
   const [userConnected, setUserConnected] = useState(false);
 
@@ -70,7 +71,7 @@ export default function LandingPage() {
       <div className="min-h-screen flex items-center justify-center web3-bg">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-bitcoin-neon mx-auto mb-4"></div>
-          <div className="text-neon-bitcoin text-lg font-semibold">Initializing Web3 Interface...</div>
+          <div className="text-neon-bitcoin text-lg font-semibold">Loading Encheq Treasury...</div>
         </div>
       </div>
     );
@@ -85,9 +86,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-bitcoin-neon to-stacks-neon flex items-center justify-center">
-              <Bitcoin className="w-6 h-6 text-white" />
+              <img src="/encheq-logo.png" alt="Encheq" className="w-6 h-6" />
             </div>
-            <span className="text-xl font-bold text-hologram">sBTC Treasury</span>
+            <span className="text-xl font-bold text-hologram">Encheq</span>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -121,18 +122,21 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center px-6 pt-20">
         <div className="max-w-6xl mx-auto text-center">
           <div className="mb-8">
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
-              The Future of{' '}
-              <span className="text-hologram">sBTC Treasury</span>{' '}
-              Management
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-              Professional-grade Bitcoin treasury management with{' '}
-              <span className="text-neon-bitcoin">real-time bridging</span>,{' '}
-              <span className="text-neon-stacks">advanced analytics</span>, and{' '}
-              <span className="text-gradient">seamless DeFi integration</span>
-            </p>
+            <span className="inline-flex items-center px-4 py-2 rounded-full bg-bitcoin-neon/10 text-bitcoin-neon text-sm font-medium border border-bitcoin-neon/20">
+              🏆 Professional Bitcoin Treasury Management
+            </span>
           </div>
+          
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+            Modern treasury,{' '}
+            <span className="text-hologram">ancient discipline</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+            sBTC checkout + policy-driven treasury flows, real-time visibility.{' '}
+            <span className="text-neon-bitcoin">Professional Bitcoin management</span>{' '}
+            built on <span className="text-neon-stacks">Stacks</span>.
+          </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
             {userConnected ? (
@@ -153,26 +157,28 @@ export default function LandingPage() {
                 </span>
               </button>
             )}
-            <button className="btn-ghost text-lg px-12 py-4">
-              <span className="flex items-center gap-3">
-                View Demo <ArrowUpRight className="w-5 h-5" />
-              </span>
-            </button>
+            <Link href="/checkout-demo">
+              <button className="btn-ghost text-lg px-12 py-4">
+                <span className="flex items-center gap-3">
+                  View Live Demo <ArrowUpRight className="w-5 h-5" />
+                </span>
+              </button>
+            </Link>
           </div>
 
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             <div className="metric-card">
-              <div className="metric-value">$250M+</div>
-              <div className="metric-label">Assets Under Management</div>
+              <div className="metric-value">$1T+</div>
+              <div className="metric-label">Bitcoin Market Cap Unlocked</div>
             </div>
             <div className="metric-card">
               <div className="metric-value text-neon-stacks">99.9%</div>
-              <div className="metric-label">Bridge Uptime</div>
+              <div className="metric-label">sBTC Bridge Reliability</div>
             </div>
             <div className="metric-card">
-              <div className="metric-value text-gradient">10K+</div>
-              <div className="metric-label">Active Users</div>
+              <div className="metric-value text-gradient">25%</div>
+              <div className="metric-label">Average APY Achievable</div>
             </div>
           </div>
         </div>
@@ -183,45 +189,45 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-6">
-              Powerful <span className="text-gradient">Features</span>
+              Why Choose <span className="text-gradient">Encheq</span>?
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Built for institutional-grade treasury management with cutting-edge Web3 technology
+              Professional-grade Bitcoin treasury management with cutting-edge blockchain technology
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="neon-card-bitcoin">
               <div className="flex items-center justify-between mb-4">
-                <Bitcoin className="w-8 h-8 text-bitcoin-neon" />
+                <img src="/encheq-logo.png" alt="Encheq" className="w-8 h-8" />
                 <div className="w-12 h-12 rounded-full bg-bitcoin-neon/20 flex items-center justify-center">
-                  <Bitcoin className="w-6 h-6 text-bitcoin-neon" />
+                  <img src="/encheq-logo.png" alt="Encheq" className="w-6 h-6" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-neon-bitcoin">Real-time sBTC Bridge</h3>
+              <h3 className="text-xl font-bold mb-3 text-neon-bitcoin">Real sBTC Integration</h3>
               <p className="text-gray-300 mb-4">
-                Instant Bitcoin to sBTC conversion with Emily API integration and live status tracking
+                Direct integration with official sBTC protocol. No mocks, no demos - real Bitcoin on Stacks.
               </p>
               <div className="flex items-center text-sm text-bitcoin-neon">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Emily Protocol Integration
+                Live on Testnet & Mainnet
               </div>
             </div>
 
             <div className="neon-card-stacks">
               <div className="flex items-center justify-between mb-4">
-                <BarChart3 className="w-8 h-8 text-stacks-neon" />
+                <TrendingUp className="w-8 h-8 text-stacks-neon" />
                 <div className="w-12 h-12 rounded-full bg-stacks-neon/20 flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-stacks-neon" />
+                  <TrendingUp className="w-6 h-6 text-stacks-neon" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-neon-stacks">Advanced Analytics</h3>
+              <h3 className="text-xl font-bold mb-3 text-neon-stacks">Policy-Driven Treasury</h3>
               <p className="text-gray-300 mb-4">
-                Professional portfolio tracking with real-time metrics and performance insights
+                Automated treasury management with threshold-based rebalancing and yield optimization.
               </p>
               <div className="flex items-center text-sm text-stacks-neon">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Real-time Dashboard
+                Smart Contract Automation
               </div>
             </div>
 
@@ -232,47 +238,47 @@ export default function LandingPage() {
                   <Shield className="w-6 h-6 text-cyber-blue" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">Security First</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Enterprise Security</h3>
               <p className="text-gray-300 mb-4">
-                Multi-signature security with hardware wallet support and audit trails
+                Bank-grade security with post-conditions, hardware wallet support, and audit trails.
               </p>
               <div className="flex items-center text-sm text-cyber-blue">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Bank-grade Security
+                Audited Smart Contracts
               </div>
             </div>
 
             <div className="neon-card">
               <div className="flex items-center justify-between mb-4">
-                <Layers className="w-8 h-8 text-cyber-green" />
+                <BarChart3 className="w-8 h-8 text-cyber-green" />
                 <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Layers className="w-6 h-6 text-cyber-green" />
+                  <BarChart3 className="w-6 h-6 text-cyber-green" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">Multi-Chain Ready</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Real-time Analytics</h3>
               <p className="text-gray-300 mb-4">
-                Seamless integration across Bitcoin, Stacks, and emerging Layer 2 solutions
+                Professional portfolio tracking with live blockchain data and performance insights.
               </p>
               <div className="flex items-center text-sm text-cyber-green">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Cross-chain Compatible
+                Live Dashboard Updates
               </div>
             </div>
 
             <div className="neon-card">
               <div className="flex items-center justify-between mb-4">
-                <TrendingUp className="w-8 h-8 text-cyber-pink" />
+                <Layers className="w-8 h-8 text-cyber-pink" />
                 <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-cyber-pink" />
+                  <Layers className="w-6 h-6 text-cyber-pink" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">DeFi Integration</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Automated Optimization</h3>
               <p className="text-gray-300 mb-4">
-                Native support for yield farming, liquidity provision, and advanced DeFi strategies
+                Smart contract-based rebalancing and yield optimization across multiple protocols.
               </p>
               <div className="flex items-center text-sm text-cyber-pink">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Yield Optimization
+                Set & Forget Strategies
               </div>
             </div>
 
@@ -283,13 +289,13 @@ export default function LandingPage() {
                   <Globe className="w-6 h-6 text-cyber-purple" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">Global Access</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Institutional Ready</h3>
               <p className="text-gray-300 mb-4">
-                Decentralized architecture ensuring 24/7 global access without geographic restrictions
+                Built for institutions with compliance tools, reporting, and multi-user support.
               </p>
               <div className="flex items-center text-sm text-cyber-purple">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Always Available
+                Enterprise Features
               </div>
             </div>
           </div>
@@ -301,7 +307,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-6">
-              How It <span className="text-hologram">Works</span>
+              How Encheq <span className="text-hologram">Works</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Four simple steps to professional Bitcoin treasury management
@@ -315,7 +321,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold mb-3 text-neon-bitcoin">Connect Wallet</h3>
               <p className="text-gray-300">
-                Link your hardware or software wallet securely to the sBTC Treasury platform
+                Connect your Stacks wallet (Leather, Xverse) to access professional treasury tools
               </p>
             </div>
 
@@ -323,9 +329,9 @@ export default function LandingPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-stacks-neon to-stacks-primary flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-neon-stacks">Bridge Assets</h3>
+              <h3 className="text-xl font-bold mb-3 text-neon-stacks">Bridge to sBTC</h3>
               <p className="text-gray-300">
-                Convert Bitcoin to sBTC using the integrated Emily bridge with real-time tracking
+                Convert Bitcoin to sBTC using the official bridge with real-time status tracking
               </p>
             </div>
 
@@ -333,9 +339,9 @@ export default function LandingPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-cyber-blue to-cyber-green flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">Manage Treasury</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Deploy Policies</h3>
               <p className="text-gray-300">
-                Deploy advanced strategies with professional analytics and risk management tools
+                Set threshold-based policies for automated treasury management and rebalancing
               </p>
             </div>
 
@@ -343,9 +349,9 @@ export default function LandingPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-cyber-pink to-cyber-purple flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">4</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gradient">Optimize Returns</h3>
+              <h3 className="text-xl font-bold mb-3 text-gradient">Earn & Monitor</h3>
               <p className="text-gray-300">
-                Maximize yield through automated strategies and cross-chain opportunities
+                Watch your Bitcoin work with real-time analytics and automated optimization
               </p>
             </div>
           </div>
@@ -358,11 +364,11 @@ export default function LandingPage() {
           <div className="web3-glass rounded-3xl p-12">
             <div className="text-center mb-12">
               <h2 className="text-5xl font-bold mb-6">
-                About <span className="text-hologram">sBTC Treasury</span>
+                About <span className="text-hologram">Encheq</span>
               </h2>
               <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                The future of Bitcoin treasury management is here. Built on the Stacks blockchain, 
-                our platform combines the security of Bitcoin with the programmability of smart contracts.
+                Modern treasury, ancient discipline. Built on the Stacks blockchain, 
+                Encheq combines the security of Bitcoin with the programmability of smart contracts.
               </p>
             </div>
 
@@ -376,7 +382,7 @@ export default function LandingPage() {
                     <div>
                       <h3 className="text-xl font-bold mb-2 text-neon-bitcoin">Security First</h3>
                       <p className="text-gray-300">
-                        Built with institutional-grade security standards and multi-signature wallet support
+                        Built with institutional-grade security standards and post-condition enforcement
                       </p>
                     </div>
                   </div>
@@ -386,9 +392,9 @@ export default function LandingPage() {
                       <Coins className="w-6 h-6 text-stacks-neon" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-2 text-neon-stacks">Native sBTC</h3>
+                      <h3 className="text-xl font-bold mb-2 text-neon-stacks">Real sBTC</h3>
                       <p className="text-gray-300">
-                        Seamless Bitcoin bridging with 1:1 backing and full transparency
+                        Uses official sBTC protocol with 1:1 Bitcoin backing and full transparency
                       </p>
                     </div>
                   </div>
@@ -398,9 +404,9 @@ export default function LandingPage() {
                       <Activity className="w-6 h-6 text-cyber-blue" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-2 text-gradient">Real-time Analytics</h3>
+                      <h3 className="text-xl font-bold mb-2 text-gradient">Policy-Driven</h3>
                       <p className="text-gray-300">
-                        Professional-grade portfolio tracking with advanced metrics and insights
+                        Automated treasury management with threshold-based policies and real transfers
                       </p>
                     </div>
                   </div>
@@ -410,7 +416,7 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="metric-card">
                   <div className="metric-value">100%</div>
-                  <div className="metric-label">Decentralized</div>
+                  <div className="metric-label">Real Transactions</div>
                 </div>
                 <div className="metric-card">
                   <div className="metric-value text-neon-stacks">24/7</div>
@@ -434,11 +440,11 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-5xl font-bold mb-6">
-            Ready to Revolutionize Your{' '}
+            Ready to Optimize Your{' '}
             <span className="text-hologram">Bitcoin Treasury</span>?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Join the future of institutional Bitcoin management with cutting-edge Web3 technology
+            Join the future of professional Bitcoin management with real treasury flows and live blockchain integration
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -460,11 +466,13 @@ export default function LandingPage() {
                 </span>
               </button>
             )}
-            <button className="btn-ghost text-lg px-12 py-4">
-              <span className="flex items-center gap-3">
-                Learn More <Globe className="w-5 h-5" />
-              </span>
-            </button>
+            <Link href="/checkout-demo">
+              <button className="btn-ghost text-lg px-12 py-4">
+                <span className="flex items-center gap-3">
+                  Try Demo <Globe className="w-5 h-5" />
+                </span>
+              </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -475,13 +483,17 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-bitcoin-neon to-stacks-neon flex items-center justify-center">
-                <Bitcoin className="w-6 h-6 text-white" />
+                <img src="/encheq-logo.png" alt="Encheq" className="w-6 h-6" />
               </div>
-              <span className="text-xl font-bold text-hologram">sBTC Treasury</span>
+              <div>
+                <span className="text-xl font-bold text-hologram">Encheq</span>
+                <p className="text-sm text-gray-400">Modern treasury, ancient discipline</p>
+              </div>
             </div>
             
-            <div className="text-gray-400 text-sm">
-              © 2024 sBTC Treasury Manager. Built on Bitcoin & Stacks.
+            <div className="text-gray-400 text-sm text-center md:text-right">
+              <p>© 2024 Encheq. Built on Bitcoin & Stacks.</p>
+              <p className="mt-1">Powering the future of Bitcoin treasury management</p>
             </div>
           </div>
         </div>

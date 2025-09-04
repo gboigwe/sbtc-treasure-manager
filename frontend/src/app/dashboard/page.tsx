@@ -12,7 +12,9 @@ import { RealDataDemo } from '@/components/dashboard/real-data-demo';
 import { ContractStatus } from '@/components/contract-status';
 import { DepositFlow } from '@/components/sbtc/deposit-flow';
 import { CheckoutWidget } from '@/components/payment/checkout-widget';
-import { WalletTest } from '@/components/debug/wallet-test';
+import { ConnectionTest } from '@/components/debug/connection-test';
+import { STXTransferTest } from '@/components/debug/stx-transfer-test';
+import { WalletDiagnostic } from '@/components/debug/wallet-diagnostic';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -89,7 +91,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-center min-h-screen px-6">
           <div className="neon-card text-center max-w-md w-full">
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-bitcoin-neon to-stacks-neon flex items-center justify-center mx-auto mb-8">
-              <Bitcoin className="w-10 h-10 text-white" />
+              <img src="/encheq-logo.png" alt="Encheq" className="w-10 h-10" />
             </div>
             
             <h1 className="text-3xl font-bold text-hologram mb-4">sBTC Treasury</h1>
@@ -152,11 +154,11 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-bitcoin-neon to-stacks-neon flex items-center justify-center">
-                <Bitcoin className="w-6 h-6 text-white" />
+                <img src="/encheq-logo.png" alt="Encheq" className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-hologram">Treasury Dashboard</h1>
-                <p className="text-gray-300 text-sm">Professional sBTC treasury management</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Encheq Dashboard</h1>
+                <p className="text-gray-300 text-sm">Modern treasury, ancient discipline</p>
               </div>
             </div>
           </div>
@@ -171,21 +173,21 @@ export default function DashboardPage() {
               <div className="flex space-x-2 min-w-max pb-1">
                 <TabsTrigger 
                   value="overview" 
-                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-bitcoin-neon data-[state=active]:bg-bitcoin-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-bitcoin-neon"
+                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-bitcoin-neon data-[state=active]:bg-bitcoin-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-purple-400"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>Overview</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="sbtc" 
-                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-bitcoin-neon data-[state=active]:bg-bitcoin-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-bitcoin-neon"
+                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-bitcoin-neon data-[state=active]:bg-bitcoin-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-green-400"
                 >
                   <ArrowLeftRight className="w-4 h-4" />
                   <span>sBTC Bridge</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="strategies" 
-                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-stacks-neon data-[state=active]:bg-stacks-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-stacks-neon"
+                  className="nav-link flex items-center space-x-2 px-4 py-3 whitespace-nowrap data-[state=active]:text-stacks-neon data-[state=active]:bg-stacks-neon/10 data-[state=active]:border-b-2 data-[state=active]:border-cyan-400"
                 >
                   <TrendingUp className="w-4 h-4" />
                   <span>Strategies</span>
@@ -246,7 +248,7 @@ export default function DashboardPage() {
               <div className="card-bitcoin">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-white flex items-center space-x-2">
-                    <Bitcoin className="w-5 h-5 text-bitcoin-400" />
+                    <img src="/encheq-logo.png" alt="Encheq" className="w-5 h-5" />
                     <span>Convert BTC → sBTC</span>
                   </CardTitle>
                   <CardDescription className="text-white/60">
@@ -302,11 +304,11 @@ export default function DashboardPage() {
                     </div>
                     
                     <CheckoutWidget
-                      businessAddress={'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM'}
-                      businessId={'demo-coffee-shop'}
-                      onSuccess={(txId) => {
+                      defaultRecipient=""
+                      allowCustomRecipient={true}
+                      onSuccess={(txId, amount, recipient) => {
                         console.log('Payment successful:', txId);
-                        alert(`🎉 Payment successful!\n\nTransaction ID: ${txId}\n\nYou can view this transaction on the Stacks Explorer.`);
+                        alert(`🎉 Payment successful!\n\nSent ${amount} sBTC to ${recipient}\nTransaction ID: ${txId}\n\nYou can view this transaction on the Stacks Explorer.`);
                       }}
                       onError={(error) => {
                         console.error('Payment error:', error);
@@ -320,8 +322,8 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="strategies" className="space-y-8">
-            <div className="grid xl:grid-cols-4 gap-8">
-              <div className="xl:col-span-3">
+            <div className="grid xl:grid-cols-3 gap-8">
+              <div className="xl:col-span-2">
                 {businessId ? (
                   <div className="neon-card">
                     <YieldStrategyManager 
@@ -337,9 +339,12 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-              <div className="xl:col-span-1">
+              <div className="xl:col-span-1 space-y-4">
                 <div className="neon-card">
-                  <WalletTest />
+                  <WalletDiagnostic />
+                </div>
+                <div className="neon-card">
+                  <STXTransferTest />
                 </div>
               </div>
             </div>

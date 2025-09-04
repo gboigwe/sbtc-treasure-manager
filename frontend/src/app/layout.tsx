@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,14 +7,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
-
 export const metadata: Metadata = {
-  title: "sBTC Treasury Manager - Professional Bitcoin Treasury Management",
-  description: "Secure, efficient sBTC treasury management with real-time Bitcoin bridging, advanced analytics, and professional Web3 interface.",
+  title: "Encheq - Modern treasury, ancient discipline",
+  description: "sBTC checkout + policy-driven treasury flows, real-time visibility. Professional Bitcoin treasury management built on Stacks.",
 };
 
 export default function RootLayout({
@@ -25,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${inter.variable} font-sans antialiased`}
       >
         {children}
       </body>

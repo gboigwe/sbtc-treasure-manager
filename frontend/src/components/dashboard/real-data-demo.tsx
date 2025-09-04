@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, ExternalLink, Wallet } from 'lucide-react';
+import { getSBTCProtocol } from '@/lib/sbtc-protocol';
 
 interface RealWalletData {
   stxBalance: number;
@@ -53,11 +54,12 @@ export function RealDataDemo({ walletAddress }: { walletAddress?: string }) {
 
       const txData = await txResponse.json();
 
-      // Process real data
+      // Process real data using the updated sBTC protocol service
       const stxBalance = parseInt(balanceData.stx.balance) / 1000000; // Convert microSTX to STX
-      const sbtcBalance = balanceData.fungible_tokens['ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-token::sbtc-token'] 
-        ? parseInt(balanceData.fungible_tokens['ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-token::sbtc-token'].balance) / 1000000
-        : 0;
+      
+      // Use the sBTC protocol service for proper balance fetching
+      const sbtcProtocol = getSBTCProtocol();
+      const sbtcBalance = await sbtcProtocol.getSBTCBalance(walletAddress);
       const totalSent = parseInt(balanceData.stx.total_sent) / 1000000;
       const totalReceived = parseInt(balanceData.stx.total_received) / 1000000;
       const transactionCount = txData.results?.length || 0;
@@ -168,10 +170,10 @@ export function RealDataDemo({ walletAddress }: { walletAddress?: string }) {
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold mb-2">Transaction Activity</h4>
-              <p>Recent Transactions: <span className="font-bold">{realData.transactionCount}</span></p>
-              <p>Net Balance: <span className="font-bold">{(realData.totalReceived - realData.totalSent).toFixed(6)} STX</span></p>
+            <div className="p-4 bg-transparent border border-gray-600 rounded-lg">
+              <h4 className="font-semibold mb-2 text-white">Transaction Activity</h4>
+              <p className="text-gray-300">Recent Transactions: <span className="font-bold text-white">{realData.transactionCount}</span></p>
+              <p className="text-gray-300">Net Balance: <span className="font-bold text-white">{(realData.totalReceived - realData.totalSent).toFixed(6)} STX</span></p>
             </div>
 
             <div className="flex items-center justify-center pt-4">

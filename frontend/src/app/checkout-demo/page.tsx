@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { CheckoutWidget } from '@/components/payment/checkout-widget';
+import { SimpleTest } from '@/components/debug/simple-test';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -20,7 +21,7 @@ export default function CheckoutDemoPage() {
     name: 'Demo Coffee Shop'
   };
 
-  const handlePaymentSuccess = (txId: string) => {
+  const handlePaymentSuccess = (txId: string, amount: number, recipient: string) => {
     setPaymentSuccess(txId);
     setPaymentError(null);
   };
@@ -40,7 +41,7 @@ export default function CheckoutDemoPage() {
               <span>Back to Home</span>
             </Link>
             <div className="h-4 border-l"></div>
-            <h1 className="text-xl font-semibold">Payment Widget Demo</h1>
+            <h1 className="text-xl font-semibold">Encheq Payment Demo</h1>
           </div>
         </div>
       </header>
@@ -52,11 +53,11 @@ export default function CheckoutDemoPage() {
               Interactive Demo
             </Badge>
             <h2 className="text-3xl font-bold mb-2">
-              sBTC Payment Widget
+              Encheq Payment Widget
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Experience our payment widget in action. This demo simulates a real business accepting sBTC payments 
-              with automatic treasury management.
+              Experience our payment widget in action. This demo uses real sBTC transfers on testnet 
+              with live blockchain integration.
             </p>
           </div>
 
@@ -152,11 +153,16 @@ export default function CheckoutDemoPage() {
               )}
             </div>
 
+            {/* Debug Section */}
+            <div className="flex justify-center mb-8">
+              <SimpleTest />
+            </div>
+
             {/* Payment Widget */}
             <div className="flex justify-center">
               <CheckoutWidget
-                businessAddress={demoBusiness.address}
-                businessId={demoBusiness.id}
+                defaultRecipient=""
+                allowCustomRecipient={true}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
               />

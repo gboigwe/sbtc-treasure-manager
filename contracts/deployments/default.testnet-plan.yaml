@@ -16,6 +16,13 @@ plan:
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
+            contract-name: sbtc-token
+            expected-sender: ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V
+            cost: 28340
+            path: contracts/sbtc-token.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
             contract-name: treasury-manager
             expected-sender: ST3A5HQKQM3T3BV1MCZ45S6Q729V8355BQ0W0NP2V
             cost: 48560
